@@ -5,13 +5,13 @@ If a request is not a HEAD method, then reply with "Hello world!"
 Usage: lua examples/server_hello.lua [<port>]
 ]]
 
-package.path = package.path .. ";/home/erona/.luarocks/share/lua/5.1/?.lua"
-
-local port = "4200" -- 0 means pick one at random
+local env = require ("...env")
+package.path = package.path .. ";./router/?.lua" .. (env.package_path or "")
+package.cpath = package.cpath .. ";./router/?.lua" .. (env.package_cpath or "")
 
 local http_server = require "http.server"
 local http_headers = require "http.headers"
-local router = require("routes")
+local router = require("router")
 
 router.add("GET", "/hello", function(stream)
     assert(stream:write_chunk("Hello server!\n", true))
@@ -63,8 +63,8 @@ local function reply(myserver, stream) -- luacheck: ignore 212
 end
 
 local myserver = assert(http_server.listen {
-	host = "localhost";
-	port = port;
+	host = env.host or "localhost";
+	port = env.port or "4200";
 	onstream = reply;
 	onerror = function(myserver, context, op, err, errno) -- luacheck: ignore 212
 		local msg = op .. " on " .. tostring(context) .. " failed"
