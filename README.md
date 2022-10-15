@@ -4,36 +4,38 @@ This is a rudimentar router implementation for http server in lua and was build 
 
 ### Dependencies
 
-It depends on http and lua 5.1. Ensure that luarocks is configured properly for this version of lua. Then:
+It depends on http. Ensure that luarocks is configured properly for your version of lua. Then:
 
 ```bash
 sudo luarocks install http
 ```
 ### Running
 
-```bash
-lua server.lua
+Create a new file and declare like below:
+
+```lua
+require("router.init")
+
+--Your code here
+
+require("router.server")
 ```
+
+Just run the file you created!
 
 ### Adding routes
 
 The router actually depends on the stream that the http server receives to output responses back. By the way, you should implement a high order function with the stream as parameter and use the stream to output what is intended.
 
 ```lua
+require("router.init")
 local router = require "routes"
 
 router.add(method, path, handler)
+require("router.server")
 ```
 
-In server.lua, two examples was already written. One of them is:
-
-```lua
-router.add("GET", "/hello", function(stream)
-    assert(stream:write_chunk("Hello server!\n", true))
-end)
-```
-
-You can write all your routes in another archive and execute them with a simple "require".
+The init.lua archive has an complete example declaring a route with customized headers. Also, you can create another archive with routes and require them from your init archive.
 
 ### Customizing headers
 
@@ -62,6 +64,26 @@ end, function()
 end)
 ```
 In this example, in order to browser parse the html file (and not display the raw version), it needs to set content-type as 'text-html'.
+
+### Exposing env variables
+
+You can customize some env variables, like host, port, and to not make any conflict in installation of http dependency from luarocks, you can customize package_path and package_cpath. Just make an archive called "env" returning a table with the parameters:
+
+- host
+- port
+- package_path
+- package_cpath
+
+Example:
+
+```lua
+return {
+    host = "localhost",
+    port = "5000"
+}
+```
+
+The router will automatically detect them. If any variable has not been declared, the router will automatically run with default parameters.
 
 ### Warrant
 
