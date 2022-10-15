@@ -5,8 +5,6 @@ If a request is not a HEAD method, then reply with "Hello world!"
 Usage: lua examples/server_hello.lua [<port>]
 ]]
 
-package.path = package.path .. ";/home/erona/.luarocks/share/lua/5.1/?.lua"
-
 local port = arg[1] or 0 -- 0 means pick one at random
 
 local http_server = require "http.server"
