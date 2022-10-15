@@ -4,32 +4,10 @@ A simple HTTP server
 If a request is not a HEAD method, then reply with "Hello world!"
 Usage: lua examples/server_hello.lua [<port>]
 ]]
-
-local env = require ("...env")
-package.path = package.path .. ";./router/?.lua" .. (env.package_path or "")
-package.cpath = package.cpath .. ";./router/?.lua" .. (env.package_cpath or "")
-
+local stats, env = pcall(require, "...env")
 local http_server = require "http.server"
 local http_headers = require "http.headers"
-local router = require("router")
-
-router.add("GET", "/hello", function(stream)
-    assert(stream:write_chunk("Hello server!\n", true))
-end)
-
-router.add("GET", "/hellotest", function(stream)
-    local hello_page = io.open("hello.html", "r")
-    assert(stream:write_body_from_file(hello_page, 1000))
-end, function()
-    local headers = http_headers.new()
-    headers:append(":status", "200")
-    headers:append("content-type", "text/html")
-    return headers
-end)
-
-router.add("GET", "/test", function(stream)
-    assert(stream:write_chunk("Test\n", true))
-end)
+local router = require("router.router")
 
 local function reply(myserver, stream) -- luacheck: ignore 212
 	-- Read in headers

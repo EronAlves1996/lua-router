@@ -1,8 +1,10 @@
+local stats, env = pcall(require, "...env")
 local http_headers = require "http.headers"
 
 local router = {
     routes = {},
 }
+
 router.execute = function(method, path, stream)
     for idx,route in pairs(router['routes']) do
         if route[1] == method and route[2] == path then
