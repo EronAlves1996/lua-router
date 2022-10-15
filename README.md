@@ -7,7 +7,7 @@ This is a rudimentar router implementation for http server in lua and was build 
 It depends on http and lua 5.1. Ensure that luarocks is configured properly for this version of lua. Then:
 
 ```bash
-sudo luarocks instal http
+sudo luarocks install http
 ```
 ### Running
 
@@ -35,4 +35,34 @@ end)
 
 You can write all your routes in another archive and execute them with a simple "require".
 
-*Warranty:* This was builded only for fun and with no purpose to run on production. Use carefully
+### Customizing headers
+
+Headers can be customized, by the way, passing another high order function as parameter, right after the handler of the request. This requires:
+
+- Create a new http_headers object
+- Appending the necessary headers to http_headers object
+- Return the final http_headers object
+
+The default option for headers is 
+
+- Status Code = 200
+- Content-Type = text/plain
+
+Below an example of customized headers for specific route:
+
+```lua
+router.add("GET", "/hellotest", function(stream)
+    local hello_page = io.open("hello.html", "r")
+    assert(stream:write_body_from_file(hello_page, 1000))
+end, function()
+    local headers = http_headers.new()
+    headers:append(":status", "200")
+    headers:append("content-type", "text/html")
+    return headers
+end)
+```
+In this example, in order to browser parse the html file (and not display the raw version), it needs to set content-type as 'text-html'.
+
+### Warrant
+
+This was builded only for fun and with no purpose to run on production. Use carefully

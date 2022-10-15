@@ -5,7 +5,9 @@ If a request is not a HEAD method, then reply with "Hello world!"
 Usage: lua examples/server_hello.lua [<port>]
 ]]
 
-local port = arg[1] or 0 -- 0 means pick one at random
+package.path = package.path .. ";/home/erona/.luarocks/share/lua/5.1/?.lua"
+
+local port = "4200" -- 0 means pick one at random
 
 local http_server = require "http.server"
 local http_headers = require "http.headers"
@@ -14,6 +16,17 @@ local router = require("routes")
 router.add("GET", "/hello", function(stream)
     assert(stream:write_chunk("Hello server!\n", true))
 end)
+
+router.add("GET", "/hellotest", function(stream)
+    local hello_page = io.open("hello.html", "r")
+    assert(stream:write_body_from_file(hello_page, 1000))
+end, function()
+    local headers = http_headers.new()
+    headers:append(":status", "200")
+    headers:append("content-type", "text/html")
+    return headers
+end)
+
 router.add("GET", "/test", function(stream)
     assert(stream:write_chunk("Test\n", true))
 end)
@@ -35,17 +48,18 @@ local function reply(myserver, stream) -- luacheck: ignore 212
 	)))
 
 	-- Build response headers
-	local res_headers = http_headers.new()
-	res_headers:append(":status", "200")
-	res_headers:append("content-type", "text/plain")
+	
 
-	-- Send headers to client; end the stream immediately if this was a HEAD request
-	assert(stream:write_headers(res_headers, req_method == "HEAD"))
 	if req_method ~= "HEAD" then
 		-- Send body, ending the stream
         router.execute(req_method, req_path, stream)
 		--assert(stream:write_chunk("Hello world!\n", true))
-	end
+    else 
+        local res_headers = http_headers.new()
+	    res_headers:append(":status", "200")
+	    res_headers:append("content-type", "text/plain")
+        assert(stream:write_headers(res_headers, req_method == "HEAD"))
+    end
 end
 
 local myserver = assert(http_server.listen {
